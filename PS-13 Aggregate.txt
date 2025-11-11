@@ -1,0 +1,60 @@
+// create collection
+db.createCollection("Books")
+
+// insert sample data
+db.Books.insertMany([
+{ TITLE:"mongodb", DESCRIPTION:"nosql db", BY:"john", URL:"http://mongo.com", TAGS:["db","nosql"], LIKES:200 },
+{ TITLE:"nosql overview", DESCRIPTION:"intro nosql", BY:"john", URL:"http://nosql.com", TAGS:["nosql"], LIKES:20 },
+{ TITLE:"node js", DESCRIPTION:"intro node", BY:"alex", URL:"http://node.com", TAGS:["js"], LIKES:50 },
+{ TITLE:"express js", DESCRIPTION:"intro express", BY:"john", URL:"http://express.com", TAGS:["js"], LIKES:120 },
+{ TITLE:"react js", DESCRIPTION:"react intro", BY:"kevin", URL:"http://react.com", TAGS:["js"], LIKES:80 }
+])
+
+
+// 1) number of books published by john
+db.Books.aggregate([
+  { $match:{ BY:"john" } },
+  { $count:"Total_John_Books" }
+])
+
+// 2) min likes and max likes published by john
+db.Books.aggregate([
+  { $match:{ BY:"john" } },
+  {
+    $group:{
+      _id:"$BY",
+      MinLikes:{$min:"$LIKES"},
+      MaxLikes:{$max:"$LIKES"}
+    }
+  }
+])
+
+// 3) average likes of books published by john
+db.Books.aggregate([
+  { $match:{ BY:"john" } },
+  {
+    $group:{
+      _id:"$BY",
+      AverageLikes:{$avg:"$LIKES"}
+    }
+  }
+])
+
+// 4) first and last book published by john (on title basis)
+db.Books.aggregate([
+  { $match:{ BY:"john" } },
+  { $sort:{ TITLE:1 } },
+  {
+    $group:{
+      _id:"$BY",
+      FirstBook:{ $first:"$TITLE" },
+      LastBook:{ $last:"$TITLE" }
+    }
+  }
+])
+
+// 5) create index on author name
+db.Books.createIndex({BY:1})
+
+// display books by john and check if index used
+db.Books.find({BY:"john"}).explain("executionStats")
