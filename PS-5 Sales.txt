@@ -1,0 +1,95 @@
+-- TABLE CREATION
+
+CREATE DATABASE SalesDB;
+USE SalesDB;
+
+CREATE TABLE Customer(
+  customer_id INT PRIMARY KEY,
+  customer_name VARCHAR(100),
+  city VARCHAR(50),
+  email VARCHAR(100)
+);
+
+CREATE TABLE Product(
+  product_id INT PRIMARY KEY,
+  product_name VARCHAR(100),
+  category VARCHAR(50),
+  price DECIMAL(10,2)
+);
+
+CREATE TABLE Sale(
+  sale_id INT PRIMARY KEY,
+  customer_id INT,
+  product_id INT,
+  quantity INT,
+  sale_date DATE,
+  total_amount DECIMAL(10,2),
+  FOREIGN KEY(customer_id) REFERENCES Customer(customer_id),
+  FOREIGN KEY(product_id) REFERENCES Product(product_id)
+);
+
+-- INSERT VALUES
+
+INSERT INTO Customer VALUES
+(1,'Amit Shah','Mumbai','amit@gmail.com'),
+(2,'Priya Mehta','Pune','priya@gmail.com'),
+(3,'Rohan Kulkarni','Delhi','rohan@gmail.com'),
+(4,'Sneha Patil','Mumbai','sneha@gmail.com');
+
+INSERT INTO Product VALUES
+(101,'Laptop','Electronics',55000),
+(102,'Mobile Phone','Electronics',25000),
+(103,'Office Chair','Furniture',7000),
+(104,'Water Bottle','Accessories',300);
+
+INSERT INTO Sale VALUES
+(1001,1,101,1,'2025-01-10',55000),
+(1002,2,102,2,'2025-01-12',50000),
+(1003,1,104,5,'2025-01-15',1500),
+(1004,3,103,1,'2025-01-20',7000),
+(1005,4,101,1,'2025-01-22',55000),
+(1006,2,104,3,'2025-01-25',900);
+
+-- A. AGGREGATION QUERIES
+
+SELECT c.customer_id,c.customer_name,SUM(s.total_amount) AS total_sales
+FROM Customer c JOIN Sale s USING(customer_id)
+GROUP BY c.customer_id,c.customer_name;
+
+SELECT p.product_id,p.product_name,SUM(s.quantity) AS total_qty
+FROM Product p JOIN Sale s USING(product_id)
+GROUP BY p.product_id,p.product_name;
+
+SELECT MAX(price) AS highest_price, MIN(price) AS lowest_price FROM Product;
+
+SELECT c.city,AVG(s.total_amount) AS avg_sales
+FROM Customer c JOIN Sale s USING(customer_id)
+GROUP BY c.city;
+
+SELECT p.category,SUM(s.total_amount) AS total_sales,COUNT(*) AS trans_count
+FROM Product p JOIN Sale s USING(product_id)
+GROUP BY p.category;
+
+-- B. SUBQUERY QUERIES
+
+SELECT customer_id,customer_name
+FROM Customer
+WHERE customer_id IN(
+  SELECT customer_id FROM Sale
+  GROUP BY customer_id
+  HAVING SUM(total_amount) > (SELECT AVG(total_amount) FROM Sale));
+
+CREATE TEMPORARY TABLE CustomerSummary AS
+SELECT customer_id,SUM(total_amount) AS total_sales
+FROM Sale GROUP BY customer_id;
+
+SELECT * FROM CustomerSummary WHERE total_sales > 10000;
+
+SELECT p.product_id,p.product_name,COUNT(s.sale_id) AS times_sold
+FROM Product p LEFT JOIN Sale s USING(product_id)
+GROUP BY p.product_id,p.product_name;
+
+SELECT DISTINCT c.customer_id,c.customer_name
+FROM Customer c JOIN Sale s USING(customer_id)
+JOIN Product p USING(product_id)
+WHERE p.category='Electronics';
