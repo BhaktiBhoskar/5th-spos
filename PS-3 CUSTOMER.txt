@@ -1,0 +1,90 @@
+CREATE DATABASE customerdb; 
+USE customerdb;
+
+
+CREATE TABLE customer(
+    customerid INT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    address VARCHAR(200),
+    phone VARCHAR(15) UNIQUE,
+    email VARCHAR(100) UNIQUE
+);
+
+
+CREATE TABLE account(
+    accountid INT PRIMARY KEY,
+    customerid INT,
+    accounttype VARCHAR(20) 
+        CHECK(accounttype IN ('savings','current')),
+    balance DECIMAL(12,2) CHECK(balance >= 0),
+    createddate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(customerid) REFERENCES customer(customerid)
+);
+
+
+CREATE TABLE transaction(
+    transactionid INT PRIMARY KEY,
+    accountid INT,
+    transactiontype VARCHAR(10) 
+        CHECK(transactiontype IN ('credit','debit')),
+    amount DECIMAL(10,2) CHECK(amount > 0),
+    transactiondate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(accountid) REFERENCES account(accountid)
+);
+
+
+CREATE VIEW customer_account_view AS
+SELECT c.name, a.accountid, a.balance
+FROM customer c 
+JOIN account a ON c.customerid = a.customerid;
+
+
+CREATE INDEX idx_transactiondate 
+ON transaction(transactiondate);
+
+-- Show tables & descriptions
+
+SHOW TABLES;
+DESC customer;
+DESC account;
+DESC transaction;
+
+-- View output
+SELECT * FROM customer;
+SELECT * FROM account;
+SELECT * FROM transaction;
+SELECT * FROM customer_account_view;
+
+
+
+
+------------------------------------------------------------
+-- INSERT DATA FOR customerdb
+------------------------------------------------------------
+
+-- CUSTOMER TABLE
+
+INSERT INTO customer (customerid, name, address, phone, email) VALUES
+(1, 'Amit Sharma', 'Pune, Maharashtra', '9000011111', 'amit@gmail.com'),
+(2, 'Priya Joshi', 'Mumbai, Maharashtra', '9000022222', 'priya@gmail.com'),
+(3, 'Rohan Patil', 'Nashik, Maharashtra', '9000033333', 'rohan@gmail.com'),
+(4, 'Sneha Desai', 'Nagpur, Maharashtra', '9000044444', 'sneha@gmail.com');
+
+-- ACCOUNT TABLE
+
+INSERT INTO account (accountid, customerid, accounttype, balance) VALUES
+(101, 1, 'savings', 25000.00),
+(102, 1, 'current', 40000.00),
+(201, 2, 'savings', 15000.00),
+(301, 3, 'current', 55000.00),
+(401, 4, 'savings', 32000.00);
+
+-- TRANSACTION TABLE
+
+INSERT INTO transaction (transactionid, accountid, transactiontype, amount) VALUES
+(1, 101, 'credit', 5000.00),
+(2, 101, 'debit', 2000.00),
+(3, 201, 'credit', 3000.00),
+(4, 301, 'debit', 10000.00),
+(5, 401, 'credit', 7000.00);
+
