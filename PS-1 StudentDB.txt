@@ -1,0 +1,113 @@
+-- Create Database
+
+CREATE DATABASE StudentDB;
+USE StudentDB;
+
+-- Department Table
+
+CREATE TABLE Department (
+    dept_id INT PRIMARY KEY,
+    DeptName VARCHAR(80) UNIQUE NOT NULL,
+    HOD_Name VARCHAR(80) NOT NULL
+);
+
+-- Student Table
+
+CREATE TABLE Student (
+    RegID INT PRIMARY KEY,
+    rollno INT UNIQUE NOT NULL,
+    fname VARCHAR(50) NOT NULL,
+    mname VARCHAR(50),
+    lname VARCHAR(50) NOT NULL,
+    gender CHAR(1) CHECK (gender IN ('M','F')),
+    dept_id INT,
+    FOREIGN KEY (dept_id) REFERENCES Department(dept_id)
+);
+
+-- Course Table
+
+CREATE TABLE Course (
+    CID INT PRIMARY KEY,
+    course_name VARCHAR(100) NOT NULL,
+    credit INT CHECK (credit > 0)
+);
+
+-- Enrolment Table
+
+CREATE TABLE Enrolment (
+    enid INT PRIMARY KEY,
+    RegID INT NOT NULL,
+    DeptID INT NOT NULL,
+    FOREIGN KEY (RegID) REFERENCES Student(RegID),
+    FOREIGN KEY (DeptID) REFERENCES Department(dept_id)
+);
+
+--------------------------------------------------------
+--              ALTER OPERATIONS
+--------------------------------------------------------
+
+-- 1) Add new column email to Student table
+
+ALTER TABLE Student
+ADD email VARCHAR(100) UNIQUE;
+
+-- 2) Modify column size of course_name to VARCHAR(120)
+
+ALTER TABLE Course
+MODIFY course_name VARCHAR(120) NOT NULL;
+
+-- 3) Rename table Enrolment to StudentEnrollment
+
+RENAME TABLE Enrolment TO StudentEnrollment;
+
+-- 4) Rename column CID to course_no in Course table
+
+ALTER TABLE Course
+CHANGE CID course_no INT;
+
+-- 5) Create index on dept_id in Student table
+
+CREATE INDEX idx_dept_id ON Student(dept_id);
+
+show tables;
+desc student;
+desc course;
+desc studentenrollment;
+desc department;
+
+
+--------------------------------------------------------
+-- INSERT DATA FOR ALL TABLES   
+--------------------------------------------------------
+
+-- Department
+
+INSERT INTO Department (dept_id, DeptName, HOD_Name) VALUES
+(1, 'Computer Science', 'Dr. Mehta'),
+(2, 'Information Technology', 'Dr. Naik'),
+(3, 'Electronics', 'Dr. Patil');
+
+-- Student
+
+INSERT INTO Student (RegID, rollno, fname, mname, lname, gender, dept_id, email) VALUES
+(101, 1001, 'Amit', 'Kumar', 'Sharma', 'M', 1, 'amit@gmail.com'),
+(102, 1002, 'Priya', NULL, 'Joshi', 'F', 2, 'priya@gmail.com'),
+(103, 1003, 'Rohan', 'S', 'Patil', 'M', 1, 'rohan@gmail.com'),
+(104, 1004, 'Sneha', NULL, 'Desai', 'F', 3, 'sneha@gmail.com');
+
+-- Course
+
+INSERT INTO Course (course_no, course_name, credit) VALUES
+(501, 'Database Management Systems', 4),
+(502, 'Operating Systems', 4),
+(503, 'Computer Networks', 3),
+(504, 'Data Structures and Algorithms', 3);
+
+-- StudentEnrollment
+
+INSERT INTO StudentEnrollment (enid, RegID, DeptID) VALUES
+(1, 101, 1),
+(2, 102, 2),
+(3, 103, 1),
+(4, 104, 3);
+
