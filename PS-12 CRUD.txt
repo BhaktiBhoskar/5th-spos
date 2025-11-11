@@ -1,0 +1,99 @@
+// 1) create collection
+db.createCollection("books")
+
+// 2) insert 5 records
+db.books.insertMany([
+{
+  title:"mongodb",
+  description:"mongodb is a nosql database",
+  by:"john",
+  url:"http://mongodb.com",
+  tags:["database","nosql"],
+  likes:200
+},
+{
+  title:"nosql overview",
+  description:"nosql database overview",
+  by:"john",
+  url:"http://nosql.com",
+  tags:["nosql","database"],
+  likes:10
+},
+{
+  title:"node js",
+  description:"node js intro",
+  by:"alex",
+  url:"http://nodejs.com",
+  tags:["node","js"],
+  likes:95
+},
+{
+  title:"react",
+  description:"react intro",
+  by:"kevin",
+  url:"http://reactjs.com",
+  tags:["react","js"],
+  likes:45
+},
+{
+  title:"express",
+  description:"express js intro",
+  by:"john",
+  url:"http://express.com",
+  tags:["express","js"],
+  likes:12
+}
+])
+
+// 3) insert 1 record with extra field
+db.books.insertOne({
+ title:"python",
+ description:"python language",
+ by:"michel",
+ url:"http://python.org",
+ tags:["python","language"],
+ likes:220,
+ username:"pruthviraj",
+ comments:"good book"
+})
+
+
+// 4) title = "mongodb"
+db.books.find({title:"mongodb"})
+
+// 5) written by john OR title mongodb
+db.books.find({
+ $or:[ {by:"john"}, {title:"mongodb"} ]
+})
+
+// 6) title mongodb AND written by john
+db.books.find({
+ $and:[ {title:"mongodb"}, {by:"john"} ]
+})
+
+// 7) likes > 10
+db.books.find({likes:{$gt:10}})
+
+// 8) likes > 100 AND (title mongodb OR by john)
+db.books.find({
+ likes:{$gt:100},
+ $or:[ {title:"mongodb"}, {by:"john"} ]
+})
+
+// 9) update title mongodb → mongodb overview
+db.books.updateOne(
+ {title:"mongodb"},
+ {$set:{title:"mongodb overview"}}
+)
+
+// 10) delete document title = nosql overview
+db.books.deleteOne({title:"nosql overview"})
+
+// 11) display 2 documents written by john
+db.books.find({by:"john"}).limit(2)
+
+// 12) display 2nd document written by john
+db.books.find({by:"john"}).skip(1).limit(1)
+
+// 13) display all books sorted (ascending)
+db.books.find().sort({title:1})
