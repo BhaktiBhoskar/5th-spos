@@ -1,0 +1,73 @@
+Problem statement 9:
+
+Cursors: (All types: Implicit, Explicit, Cursor FOR Loop, Parameterized Cursor) Problem Statement: Student_Result using Cursors Student_Result(stud_id, name,dept,Total_mark) 1) Write a PL/SQL block to insert a new record into Student_Result the table and display the number of rows affected 2) display the name and Total_marks of each student from the Student_Result table. 3) Use FOR loop to display the data 4) Create a parameterized cursor that accepts the department name as a parameter and displays the list of students 5) Write the cursor for UPDATE
+
+Table:
+
+create table student_result(stud_id number, name varchar2(20), dept varchar2(20), total_mark number);
+
+Insert and Display Rows Affected :
+
+begin
+  insert into student_result values(1,'ravi','cse',1200);
+  dbms_output.put_line(sql%rowcount || ' row inserted');
+end;
+/
+
+Explicit Cursor – Display Name & Marks :
+
+declare
+  cursor c1 is select name,total_mark from student_result;
+  v_name student_result.name%type;
+  v_mark student_result.total_mark%type;
+begin
+  open c1;
+  loop
+    fetch c1 into v_name,v_mark;
+    exit when c1%notfound;
+    dbms_output.put_line(v_name || ' - ' || v_mark);
+  end loop;
+  close c1;
+end;
+/
+
+Cursor FOR Loop :
+
+begin
+  for rec in (select name,total_mark from student_result) loop
+    dbms_output.put_line(rec.name || ' ' || rec.total_mark);
+  end loop;
+end;
+/
+
+Parameterized Cursor :
+
+declare
+  cursor c2(p_dept varchar2) is select name,total_mark from student_result where dept=p_dept;
+begin
+  for rec in c2('cse') loop
+    dbms_output.put_line(rec.name || ' ' || rec.total_mark);
+  end loop;
+end;
+/
+
+
+Cursor for UPDATE :
+
+declare
+  cursor c3 is select total_mark from student_result for update;
+begin
+  for rec in c3 loop
+    update student_result set total_mark = rec.total_mark + 10 where current of c3;
+  end loop;
+end;
+/
+
+select * from student_result;
+
+Execution in SQL*Plus:
+
+set serveroutput on;
+@filename.sql
+
+
