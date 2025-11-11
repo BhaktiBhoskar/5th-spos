@@ -1,0 +1,109 @@
+// create collection
+db.orders.insertMany([
+{cus_id:"A1",amount:400,status:"P"},
+{cus_id:"B1",amount:300,status:"D"},
+{cus_id:"A1",amount:200,status:"F"},
+{cus_id:"C1",amount:200,status:"F"},
+{cus_id:"B1",amount:700,status:"P"},
+{cus_id:"B1",amount:800,status:"P"}
+])
+
+// ---------------------------
+// 1) SUM(amount) of each customer where status = P
+// ---------------------------
+
+var map1 = function(){
+  if(this.status=="P"){
+    emit(this.cus_id, this.amount);
+  }
+}
+
+var reduce1 = function(key, values){
+  return Array.sum(values);
+}
+
+db.orders.mapReduce(
+  map1,
+  reduce1,
+  {out:"sum_status_P"}
+)
+
+// view result
+db.sum_status_P.find()
+
+
+// ---------------------------
+// 2) AVERAGE amount of each customer  (all status)
+// ---------------------------
+
+var map2 = function(){
+    emit(this.cus_id, {sum:this.amount,count:1});
+}
+
+var reduce2 = function(key, values){
+    var result = {sum:0,count:0};
+    values.forEach(function(value){
+        result.sum+=value.sum;
+        result.count+=value.count;
+    });
+    return result;
+}
+
+var finalize2 = function(key, reducedVal){
+    return reducedVal.sum/reducedVal.count;
+}
+
+db.orders.mapReduce(
+  map2,
+  reduce2,
+  {out:"avg_amount", finalize:finalize2}
+)
+
+// view result
+db.avg_amount.find()
+
+
+// ---------------------------
+// 3) MIN amount of each customer
+// ---------------------------
+
+var map3 = function(){
+    emit(this.cus_id, this.amount);
+}
+
+var reduce3 = function(key, values){
+    return Math.min.apply(null,values);
+}
+
+db.orders.mapReduce(
+  map3,
+  reduce3,
+  {out:"min_amount"}
+)
+
+// view result
+db.min_amount.find()
+
+
+// ---------------------------
+// 4) MAX amount of each customer where status = F
+// ---------------------------
+
+var map4 = function(){
+  if(this.status=="F"){
+    emit(this.cus_id, this.amount);
+  }
+}
+
+var reduce4 = function(key, values){
+    return Math.max.apply(null,values);
+}
+
+db.orders.mapReduce(
+  map4,
+  reduce4,
+  {out:"max_status_F"}
+)
+
+// view result
+db.max_status_F.find()
