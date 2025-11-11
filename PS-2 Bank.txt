@@ -1,0 +1,111 @@
+CREATE DATABASE bankdb;
+USE bankdb;
+
+CREATE TABLE bank(
+    bank_id INT PRIMARY KEY,
+    bank_name VARCHAR(100) NOT NULL UNIQUE,
+    ho_address VARCHAR(200) NOT NULL,
+    contactno VARCHAR(15) NOT NULL UNIQUE
+);
+
+
+CREATE TABLE branch(
+    branch_id INT PRIMARY KEY,
+    bank_id INT,
+    branch_name VARCHAR(80) NOT NULL,
+    ifsc VARCHAR(20) UNIQUE NOT NULL,
+    city VARCHAR(50) NOT NULL,
+    state VARCHAR(50) NOT NULL,
+    pincode VARCHAR(10) NOT NULL,
+    FOREIGN KEY(bank_id) REFERENCES bank(bank_id)
+);
+
+
+CREATE TABLE customer(
+    customerid INT PRIMARY KEY,
+    fname VARCHAR(30) NOT NULL,
+    mname VARCHAR(30),
+    lname VARCHAR(30) NOT NULL,
+    gender CHAR(1) CHECK(gender IN('M','F')),
+    dob DATE NOT NULL,
+    phone VARCHAR(15) NOT NULL UNIQUE,
+    create_on DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE account(
+    account_id INT PRIMARY KEY,
+    customer_id INT,
+    branch_id INT,
+    account_no VARCHAR(20) UNIQUE NOT NULL,
+    account_type VARCHAR(20) CHECK(account_type IN('savings','current')),
+    balance DECIMAL(12,2) CHECK(balance>=0),
+    status VARCHAR(10) DEFAULT 'active',
+    open_on DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(customer_id) REFERENCES customer(customerid),
+    FOREIGN KEY(branch_id) REFERENCES branch(branch_id)
+);
+
+
+-- 1) Add email column
+
+ALTER TABLE customer ADD email VARCHAR(120) UNIQUE;
+
+-- 2) Modify branch_name size
+
+ALTER TABLE branch MODIFY branch_name VARCHAR(120);
+
+-- 3) Rename table Account → CustomerAccount
+
+RENAME TABLE account TO customeraccount;
+
+-- 4) Rename column ifsc → ifsc_code
+
+ALTER TABLE branch RENAME COLUMN ifsc TO ifsc_code;
+
+-- 5) Create index on branch_id
+
+CREATE INDEX idx_branchid ON customeraccount(branch_id);
+
+-- View structure
+
+SHOW TABLES;
+DESC customeraccount;
+DESC branch;
+
+
+--------------------------------------------------------
+-- Insert Data for bankdb (All Tables)
+--------------------------------------------------------
+
+-- BANK
+
+INSERT INTO bank (bank_id, bank_name, ho_address, contactno) VALUES
+(1, 'State Bank of India', 'Mumbai, Maharashtra', '9876543210'),
+(2, 'HDFC Bank', 'Mumbai, Maharashtra', '9123456780'),
+(3, 'ICICI Bank', 'Mumbai, Maharashtra', '9988776655');
+
+-- BRANCH
+
+INSERT INTO branch (branch_id, bank_id, branch_name, ifsc_code, city, state, pincode) VALUES
+(101, 1, 'SBI Pune Camp Branch', 'SBI0000101', 'Pune', 'Maharashtra', '411001'),
+(102, 1, 'SBI Mumbai Andheri Branch', 'SBI0000102', 'Mumbai', 'Maharashtra', '400058'),
+(201, 2, 'HDFC Koregaon Park Branch', 'HDFC0000201', 'Pune', 'Maharashtra', '411036'),
+(301, 3, 'ICICI MG Road Branch', 'ICIC0000301', 'Bengaluru', 'Karnataka', '560001');
+
+-- CUSTOMER
+
+INSERT INTO customer (customerid, fname, mname, lname, gender, dob, phone, email) VALUES
+(1, 'Amit', 'Kumar', 'Sharma', 'M', '1995-06-10', '9000011111', 'amit@gmail.com'),
+(2, 'Priya', NULL, 'Joshi', 'F', '1998-12-01', '9000022222', 'priya@gmail.com'),
+(3, 'Rohan', 'S', 'Patil', 'M', '1992-03-15', '9000033333', 'rohan@gmail.com'),
+(4, 'Sneha', NULL, 'Desai', 'F', '1999-07-20', '9000044444', 'sneha@gmail.com');
+
+-- CUSTOMERACCOUNT
+
+INSERT INTO customeraccount (account_id, customer_id, branch_id, account_no, account_type, balance, status) VALUES
+(1001, 1, 101, 'SBIA0001001', 'savings', 25000.00, 'active'),
+(1002, 2, 102, 'SBIA0001002', 'current', 50000.00, 'active'),
+(2001, 3, 201, 'HDFCA0002001', 'savings', 15000.00, 'active'),
+(3001, 4, 301, 'ICICA0003001', 'savings', 32000.00, 'active');
+
