@@ -1,0 +1,79 @@
+Problem statement 11: 
+
+Write a program to implement mysql database connectivity with java to implement Database navigation operations (add, delete, edit, fetch) give me simple one line query answer with proper steps and small case query with proper answer
+
+Create Database and Table in MySQL
+
+create database college;
+use college;
+create table student(id int, name varchar(30));
+desc student;
+select * from student;
+
+
+Write Java Program
+
+import java.sql.*;
+
+class dbconnect {
+  public static void main(String args[]) {
+    try {
+      Class.forName("com.mysql.cj.jdbc.Driver");  // load driver
+      Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/college","root","password");
+      Statement st = con.createStatement();
+
+      // add record
+      st.executeUpdate("insert into student values(1,'ravi')");
+      System.out.println("record added");
+
+      // edit record
+      st.executeUpdate("update student set name='amit' where id=1");
+      System.out.println("record updated");
+
+      // delete record
+      st.executeUpdate("delete from student where id=1");
+      System.out.println("record deleted");
+
+      // fetch record
+      ResultSet rs = st.executeQuery("select * from student");
+      while(rs.next()) {
+        System.out.println(rs.getInt(1)+" "+rs.getString(2));
+      }
+
+      con.close();
+    } catch(Exception e) {
+      System.out.println(e);
+    }
+  }
+}
+
+
+👉 Save the file as dbconnect.java
+
+
+Open Command Prompt
+
+Type the following commands step by step 👇
+
+1️⃣ Go to the folder where your file is saved
+Example:
+
+cd desktop
+
+
+2️⃣ Compile Java program:
+
+javac dbconnect.java
+
+
+3️⃣ Run program:
+
+java dbconnect
+
+
+OUTPUT :
+
+record added
+record updated
+record deleted
+
